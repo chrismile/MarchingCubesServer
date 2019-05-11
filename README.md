@@ -29,5 +29,7 @@ mkdir build
 cd build
 cmake ..
 make -j 4
+ln -s ../cl .
 ```
 
+Please note that creating a symbolic link in the application directory to the directory containing the OpenCL code files is necessary for the application to run.
