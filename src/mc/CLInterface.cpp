@@ -31,8 +31,6 @@
 #include <fstream>
 #include "CLInterface.hpp"
 
-using namespace std;
-
 CLInterface::~CLInterface()
 {
 }
@@ -42,7 +40,7 @@ void CLInterface::initialize(CLContextInfo contextInfo)
 	// 1. Get right OpenCL platform
     cl::Platform::get(&allPlatforms);
     if (allPlatforms.size() <= contextInfo.platformNum) {
-    	cerr << "Fatal Error: No OpenCL platform with specified ID found!" << endl;
+        std::cerr << "Fatal Error: No OpenCL platform with specified ID found!" << std::endl;
     	exit(1);
     }
     platform = allPlatforms.at(contextInfo.platformNum);
@@ -50,7 +48,7 @@ void CLInterface::initialize(CLContextInfo contextInfo)
 	// 2. Get right OpenCL device(s)
 	platform.getDevices(CL_DEVICE_TYPE_ALL, &allDevices);
 	if(allDevices.size() == 0){
-		cout << "No OpenCL devices found. Please check your installation!" << endl;
+        std::cout << "No OpenCL devices found. Please check your installation!" << std::endl;
 		exit(1);
 	}
 	if (contextInfo.useAllDevices) {
@@ -66,13 +64,13 @@ void CLInterface::initialize(CLContextInfo contextInfo)
 
 void CLInterface::printInfo()
 {
-	cout << "Number of OpenCL platforms: " << allPlatforms.size() << endl;
-	cout << "Standard OpenCL platform:" << endl;
-	cout << platform.getInfo<CL_PLATFORM_NAME>() << endl;
-	cout << platform.getInfo<CL_PLATFORM_VERSION>() << endl << endl;
+    std::cout << "Number of OpenCL platforms: " << allPlatforms.size() << std::endl;
+    std::cout << "Standard OpenCL platform:" << std::endl;
+    std::cout << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
+    std::cout << platform.getInfo<CL_PLATFORM_VERSION>() << std::endl << std::endl;
 	int i = 0;
 	for (cl::Device &device : devices) {
-		cout << "Using device #" << i << ": " << device.getInfo<CL_DEVICE_NAME>() << endl;
+        std::cout << "Using device #" << i << ": " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
 		i++;
 	}
 }
@@ -100,8 +98,9 @@ cl::Program CLInterface::loadProgramFromSourceFile(const char *filename)
  * @param context: The OpenCL context
  * @param devices: The devices that shall be used for compiling the program
  */
-cl::Program compileSourceFile(const std::string &filename, cl::Context context, cl::Platform platform, vector<cl::Device> devices) {
-	cout << "Compiling " << filename << "..." << endl;
+cl::Program compileSourceFile(const std::string &filename, cl::Context context, cl::Platform platform,
+        std::vector<cl::Device> devices) {
+	std::cout << "Compiling " << filename << "..." << std::endl;
 
 	cl::Program::Sources sources;
 	std::string kernelCode = loadTextFile(filename.c_str());
@@ -113,7 +112,8 @@ cl::Program compileSourceFile(const std::string &filename, cl::Context context, 
 		compileArgs = "";
 	}
 	if (program.compile(compileArgs.c_str()) != CL_SUCCESS) {
-		cerr << "Error while building " << filename << ":" << endl << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << endl;
+        std::cerr << "Error while building " << filename << ":" << std::endl
+                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 		exit(1);
 	}
 	return program;
@@ -131,7 +131,8 @@ cl::Program CLInterface::loadProgramFromSourceFiles(const std::vector<std::strin
 	cl_int err = CL_SUCCESS;
 	cl::Program linkedProgram = cl::linkProgram(programs, NULL, NULL, NULL, &err);
 	if (err != CL_SUCCESS) {
-		cerr << "Error while linking programs:" << endl << linkedProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << endl;
+		std::cerr << "Error while linking programs:" << std::endl
+		        << linkedProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
 		exit(1);
 	}
 	return linkedProgram;
@@ -151,7 +152,8 @@ cl::Program CLInterface::loadProgramFromBinaryFile(const char *filename)
 	
 	cl::Program program(context, devices, binaries);
 	if (program.build(devices) != CL_SUCCESS){
-		cerr << "Error while builing cl::Program: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << endl;
+        std::cerr << "Error while builing cl::Program: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
+                << std::endl;
 		exit(1);
 	}
 	return program;

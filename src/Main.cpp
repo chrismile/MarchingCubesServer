@@ -107,7 +107,7 @@ void listenForClose() {
     do {
         std::string command;
         std::getline(std::cin, command);
-        if (command == "quit") {
+        if (command == "quit" || command == "exit") {
             running = false;
         } else {
             std::cerr << "Unknown command!" << std::endl;
@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
         mcServer.start_accept();
 
         // Start the ASIO io_service run loop
+        std::cout << "Starting the server..." << std::endl;
         std::thread serverThread = std::thread(runServer, &mcServer);
 
         // Wait for the user to type a command in the command line that closes the server.
