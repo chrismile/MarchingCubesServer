@@ -32,7 +32,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "CLInterface.hpp"
-#include "Defines.hpp"
+#include "CartesianGrid.hpp"
 
 class MarchingCubesImpl {
 public:

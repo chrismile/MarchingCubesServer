@@ -25,9 +25,12 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef MARCHINGCUBESSERVER_CARTESIANGRID_HPP
+#define MARCHINGCUBESSERVER_CARTESIANGRID_HPP
 
-#ifndef NETCDFIMPORTER_DEFINES_HPP
-#define NETCDFIMPORTER_DEFINES_HPP
+#include <vector>
+#include <json/json.h>
+#include <glm/glm.hpp>
 
 struct CartesianGridCorner {
     // Corner position (xyz) and scalar value (w).
@@ -35,4 +38,17 @@ struct CartesianGridCorner {
     float f;
 };
 
-#endif //NETCDFIMPORTER_DEFINES_HPP
+/**
+ * Constructs a cartesian grid from a scalar field in 3D.
+ * @param origin Origin of the cartesian grid.
+ * @param dx Distance between two vertices in x direction (assuming dx = dy = dz).
+ * @param nx The number of vertices in x direction (assuming nx = ny = nz).
+ * @param scalarFunctionCdy A three-dimensional scalar field function vec3 -> Number.
+ * The function is stored as a parsed source tree of a CindyScript function.
+ * @param variables The free variables in the function to substitute.
+ * @return The corners of the cartesian grid (with scalar values attached).
+ */
+std::vector<CartesianGridCorner> constructCartesianGridScalarField(const glm::vec3 &origin, float dx, uint32_t nx,
+        Json::Value &scalarFunctionCdy, Json::Value &variables);
+
+#endif //MARCHINGCUBESSERVER_CARTESIANGRID_HPP
