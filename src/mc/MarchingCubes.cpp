@@ -55,12 +55,12 @@ void MarchingCubesImpl::init()
     queue = cl::CommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE);
 #endif
 
-    size_t max_work_size;
-    devices[0].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &max_work_size);
+    size_t maxWorkGroupSize;
+    devices[0].getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &maxWorkGroupSize);
 
-    // Set local work size (if input value is < 0 or > then max_work_size, max_work_size is used)
+    // Set local work size.
     LOCAL_WORK_SIZE = cl::NDRange(64, 4, 1);
-    assert(LOCAL_WORK_SIZE[0] * LOCAL_WORK_SIZE[1] * LOCAL_WORK_SIZE[2] <= max_work_size);
+    assert(LOCAL_WORK_SIZE[0] * LOCAL_WORK_SIZE[1] * LOCAL_WORK_SIZE[2] <= maxWorkGroupSize);
 }
 
 void MarchingCubesImpl::quit()

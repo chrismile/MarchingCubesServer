@@ -44,7 +44,7 @@ struct CLContextInfo {
     size_t platformNum;
     /**
      * false: Use only one (default) device
-     *  true: Use all devices available (usually multiple GPUs), experimental
+     * true: Use all devices available (usually multiple GPUs), experimental
      */
     bool useAllDevices;
 
