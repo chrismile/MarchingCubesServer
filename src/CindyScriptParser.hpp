@@ -26,13 +26,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NETCDFIMPORTER_DEFINES_HPP
-#define NETCDFIMPORTER_DEFINES_HPP
+#ifndef MARCHINGCUBESSERVER_CINDYSCRIPTPARSER_HPP
+#define MARCHINGCUBESSERVER_CINDYSCRIPTPARSER_HPP
 
-struct CartesianGridCorner {
-    // Corner position (xyz) and scalar value (w).
-    glm::vec3 v;
-    float f;
-};
+#include <string>
+#include <map>
+#include <json/json.h>
 
-#endif //NETCDFIMPORTER_DEFINES_HPP
+/**
+ * Evaluates a CindyScript function returning a floating point number.
+ * @param expr The CindyScript expression to evaluate (as a parsed source tree).
+ * @param variables The variables to use as substitutions in the expressions.
+ * @return The evaluated value.
+ */
+float evaluateExpressionCdy(Json::Value &expr, std::map<std::string, float> &variables);
+
+#endif //MARCHINGCUBESSERVER_CINDYSCRIPTPARSER_HPP

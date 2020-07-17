@@ -25,28 +25,30 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef NETCDFIMPORTER_MARCHINGCUBES_HPP
-#define NETCDFIMPORTER_MARCHINGCUBES_HPP
+#ifndef MARCHINGCUBESSERVER_CARTESIANGRID_HPP
+#define MARCHINGCUBESSERVER_CARTESIANGRID_HPP
 
 #include <vector>
+#include <json/json.h>
 #include <glm/glm.hpp>
-#include "CLInterface.hpp"
-#include "CartesianGrid.hpp"
 
-class MarchingCubesImpl {
-public:
-    void init();
-    void quit();
-    std::vector<glm::vec3> marchingCubes(uint32_t nx, float isoLevel,
-            const std::vector<CartesianGridCorner> &cartesianGrid);
-
-private:
-    cl::Context context;
-    std::vector<cl::Device> devices;
-    cl::Program computeProgram; //!< Contains all compute kernels
-    cl::CommandQueue queue;     //!< For sending commands asynchronously to context
-    cl::NDRange LOCAL_WORK_SIZE;
+struct CartesianGridCorner {
+    // Corner position (xyz) and scalar value (w).
+    glm::vec3 v;
+    float f;
 };
 
-#endif //NETCDFIMPORTER_MARCHINGCUBES_HPP
+/**
+ * Constructs a cartesian grid from a scalar field in 3D.
+ * @param origin Origin of the cartesian grid.
+ * @param dx Distance between two vertices in x direction (assuming dx = dy = dz).
+ * @param nx The number of vertices in x direction (assuming nx = ny = nz).
+ * @param scalarFunctionCdy A three-dimensional scalar field function vec3 -> Number.
+ * The function is stored as a parsed source tree of a CindyScript function.
+ * @param variables The free variables in the function to substitute.
+ * @return The corners of the cartesian grid (with scalar values attached).
+ */
+std::vector<CartesianGridCorner> constructCartesianGridScalarField(const glm::vec3 &origin, float dx, uint32_t nx,
+        Json::Value &scalarFunctionCdy, Json::Value &variables);
+
+#endif //MARCHINGCUBESSERVER_CARTESIANGRID_HPP

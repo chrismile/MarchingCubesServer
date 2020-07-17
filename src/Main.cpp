@@ -31,10 +31,11 @@
 #include <chrono>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-#include <glm/glm.hpp>
+#include <json/json.h>
 #include "BinaryStream.hpp"
+#include "CindyScriptParser.hpp"
 #include "mc/MarchingCubes.hpp"
-#include "mc/Defines.hpp"
+#include "mc/CartesianGrid.hpp"
 
 /**
  * As the data transfer to the application can be quite large, the maximum message size is set to 320MB.
@@ -62,29 +63,58 @@ static MarchingCubesImpl *mcImpl = NULL;
  * @param msg The received message.
  */
 void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
-    if (msg->get_opcode() != websocketpp::frame::opcode::binary) {
-        std::cerr << "Expected binary opcode." << std::endl;
+    if (msg->get_opcode() != websocketpp::frame::opcode::text
+            && msg->get_opcode() != websocketpp::frame::opcode::binary) {
+        std::cerr << "Expected text opcode." << std::endl;
         return;
     }
     std::cout << "Received request." << std::endl;
 
-    BinaryReadStream readStream((const void *)msg->get_payload().data(), msg->get_payload().size());
-
-    float isoLevel = 0.0f;
-
-    // Read number of cells in x, y and z direction (for now uniform).
-    uint32_t nx = 0;
-    readStream.read(nx);
-    std::cout << "nx: " << nx << std::endl;
-
-    // Allocate memory for cartesian grid and read the data.
     std::vector<CartesianGridCorner> cartesianGrid;
-    cartesianGrid.resize(nx*nx*nx);
-    readStream.read((void*)&cartesianGrid.front(), sizeof(CartesianGridCorner)*nx*nx*nx);
+    uint32_t nx = 0;
+    float isoValue = 0.0f;
+
+    // For more information on the message format, see IsoSurface.js of CindyPrint.
+    if (msg->get_opcode() == websocketpp::frame::opcode::text) {
+        std::cout << "Processing JSON request..." << nx << std::endl;
+        Json::Value root;
+        Json::CharReaderBuilder readerBuilder;
+        Json::CharReader *reader = readerBuilder.newCharReader();
+        std::string jsonErrorString;
+        if (!reader->parse(msg->get_payload().c_str(), msg->get_payload().c_str() + msg->get_payload().size(),
+                           &root, &jsonErrorString)) {
+            std::cerr << "Couldn't parse JSON string." << std::endl << jsonErrorString << std::endl;
+        }
+        delete reader;
+
+        glm::vec3 origin(root["origin"]["x"].asFloat(), root["origin"]["y"].asFloat(), root["origin"]["z"].asFloat());
+        float dx = root["dx"].asFloat();
+        nx = root["nx"].asUInt();
+        isoValue = root["isoValue"].asFloat();
+        Json::Value scalarFunctionCdy = root["scalarFunction"];
+        Json::Value variables = root["variables"];
+
+        cartesianGrid = constructCartesianGridScalarField(
+                origin, dx, nx, scalarFunctionCdy, variables);
+    }
+
+    if (msg->get_opcode() == websocketpp::frame::opcode::binary) {
+        std::cout << "Processing binary request..." << nx << std::endl;
+        BinaryReadStream readStream((const void *)msg->get_payload().data(), msg->get_payload().size());
+
+        // Read number of cells in x, y and z direction (for now uniform).
+        readStream.read(nx);
+
+        // Allocate memory for cartesian grid and read the data.
+        cartesianGrid.resize(nx*nx*nx);
+        readStream.read((void*)&cartesianGrid.front(), sizeof(CartesianGridCorner)*nx*nx*nx);
+    }
+
+    std::cout << "nx: " << nx << std::endl;
 
     // Launch the marching cubes algorithm for creating the iso surface and measure the time it took.
     auto startLoad = std::chrono::system_clock::now();
-    std::vector<glm::vec3> trianglePoints = mcImpl->marchingCubes(nx, isoLevel, cartesianGrid);
+    std::vector<glm::vec3> trianglePoints = mcImpl->marchingCubes(nx, isoValue, cartesianGrid);
     auto endLoad = std::chrono::system_clock::now();
     auto elapsedLoad = std::chrono::duration_cast<std::chrono::milliseconds>(endLoad - startLoad);
     std::cout << "Marching cubes finished in: " << std::to_string(elapsedLoad.count()/1000.0f) << "s" << std::endl;
