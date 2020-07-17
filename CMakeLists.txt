@@ -12,8 +12,12 @@ include_directories(src)
 cmake_policy(SET CMP0012 NEW)
 find_package(OpenMP REQUIRED)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
-target_link_libraries(MarchingCubesServer ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+find_package(websocketpp REQUIRED)
+target_link_libraries(MarchingCubesServer ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} websocketpp::websocketpp)
 target_link_libraries(MarchingCubesServer OpenCL)
+
+include_directories(${Boost_INCLUDE_DIR})
+include_directories(${WEBSOCKETPP_INCLUDE_DIR})
 
 if(OPENMP_FOUND)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

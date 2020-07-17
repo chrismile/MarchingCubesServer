@@ -5,11 +5,13 @@ This application is meant to be used together with the CindyPrint plugin of the 
 
 Application port: 17279
 
+
 ## Building and running the programm
-On Ubuntu 18.04 for example, you can install all necessary packages with this command:
+
+On Ubuntu 20.04 for example, you can install all necessary packages with this command:
 
 ```
-sudo apt-get install git cmake libboost-dev ocl-icd-opencl-dev opencl-headers clinfo
+sudo apt-get install git cmake libboost-dev ocl-icd-opencl-dev opencl-headers clinfo libwebsocketpp-dev
 ```
 
 The application was tested using NVIDIA's OpenCL implementation, Intel NEO and POCL. However, it should also run with different implementations.
