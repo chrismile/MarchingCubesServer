@@ -131,7 +131,7 @@ std::vector<glm::vec3> MarchingCubesImpl::marchingCubes(uint32_t nx, float isoLe
             LOCAL_WORK_SIZE);
 
     // The kernel used for computing the number of vertices that get generated in a first pass.
-    cl::make_kernel<cl::Buffer, cl::Buffer, unsigned int, float> computeNumVertices(
+    auto computeNumVertices = cl::KernelFunctor<cl::Buffer, cl::Buffer, unsigned int, float>(
             cl::Kernel(computeProgram, "computeNumVertices"));
     computeNumVertices(eargs, cartesianGridBuffer, vertexCounterBuffer, nx, isoLevel);
 
@@ -153,7 +153,7 @@ std::vector<glm::vec3> MarchingCubesImpl::marchingCubes(uint32_t nx, float isoLe
     cl::Buffer vertexBuffer = cl::Buffer(context, CL_MEM_WRITE_ONLY, sizeof(glm::vec4) * numVertices);
 
     // Finally, launch the marching cubes algorithm.
-    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, unsigned int, float> marchingCubes(
+    auto marchingCubes = cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, unsigned int, float>(
             cl::Kernel(computeProgram, "marchingCubes"));
     marchingCubes(eargs, cartesianGridBuffer, vertexBuffer, vertexCounterBuffer, nx, isoLevel);
 

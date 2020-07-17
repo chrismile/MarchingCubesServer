@@ -145,11 +145,11 @@ cl::Program CLInterface::loadProgramFromBinaryFile(const char *filename)
 	ifile.seekg(0, std::ios::end);
 	std::streampos size = ifile.tellg();
 	ifile.seekg(0, std::ios::beg);
-	std::vector<char> buffer(size);
-	ifile.read(buffer.data(), size);
+	std::vector<unsigned char> buffer(size);
+	ifile.read((char*)buffer.data(), size);
 	ifile.close();
-	binaries.push_back({std::make_pair(buffer.data(), size)});
-	
+    binaries.push_back(buffer);
+
 	cl::Program program(context, devices, binaries);
 	if (program.build(devices) != CL_SUCCESS){
         std::cerr << "Error while builing cl::Program: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
